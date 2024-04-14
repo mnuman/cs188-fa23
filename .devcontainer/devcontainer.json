@@ -23,8 +23,5 @@
 		}
 	},
 	// https://github.com/microsoft/vscode-remote-release/issues/2485#issuecomment-1722584736
-	"runArgs": ["--name", "cs188fa23"],
-	"mounts": [
-		"source=vsc-cs188fa23,target=/workspaces,type=volume"
-	]
+	"runArgs": ["--name", "cs188fa23"]
 }
