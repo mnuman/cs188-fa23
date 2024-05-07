@@ -36,10 +36,11 @@ Good luck and happy searching!
 
 from calendar import c
 from dataclasses import dataclass
-from typing import List, Tuple, Any
+from typing import Iterable, List, Tuple, Any
 from game import Directions
 from game import Agent
 from game import Actions
+from itertools import permutations
 import util
 import time
 import search
@@ -438,10 +439,9 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
 
     "*** YOUR CODE HERE ***"
     cornersVisited, currentPosition = state
+    cornersToVisit = set(corners) - cornersVisited
     cornerDistances = [
-        abs(currentPosition[0] - corner[0]) + abs(currentPosition[1] - corner[1])
-        for corner in corners
-        if corner not in cornersVisited
+        pathDistance(currentPosition, path) for path in permutations(cornersToVisit)
     ]
     return min(cornerDistances) if len(cornerDistances) > 0 else 0
 
@@ -650,3 +650,14 @@ def mazeDistance(
         gameState, start=point1, goal=point2, warn=False, visualize=False
     )
     return len(search.bfs(prob))
+
+
+def pathDistance(currPos: Tuple[int, int], path: Iterable[Tuple[int, int]]) -> int:
+    """
+    Returns distance when visiting all points in the path from the current position
+    """
+    sumDist = 0
+    for c in path:
+        sumDist += abs(c[0] - currPos[0]) + abs(c[1] - currPos[1])
+        currPos = c
+    return sumDist
