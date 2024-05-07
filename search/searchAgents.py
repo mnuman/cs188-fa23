@@ -552,14 +552,24 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    cost = 0
     food = foodGrid.asList()
-    while len(food) > 0:
-        food.sort(key=lambda x: util.manhattanDistance(position, x))
-        closest_food, food = food[0], food[1:]
-        cost += util.manhattanDistance(position, closest_food)
-        position = closest_food
-    return cost
+    food.sort(key=lambda x: util.manhattanDistance(position, x))
+    consider = 5
+    costs = []
+    for i in range(min(consider, len(food))):
+        consideredFoods = food[0:consider]
+        eatFirst = consideredFoods.pop(i)
+        consideredFoods.insert(0, eatFirst)
+        consideredFoods.insert(0, position)
+        costs.append(
+            sum(
+                [
+                    util.manhattanDistance(p1, p2)
+                    for p1, p2 in zip(consideredFoods, consideredFoods[1:])
+                ]
+            )
+        )
+    return min(costs) if len(costs) > 0 else 0
 
 
 class ClosestDotSearchAgent(SearchAgent):
