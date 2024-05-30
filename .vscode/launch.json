@@ -9,9 +9,9 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "cwd": "${workspaceFolder}/search",
+            "cwd": "${workspaceFolder}/multiagent",
             "console": "integratedTerminal",
-            "args": "-l bigSearch -p ClosestDotSearchAgent -z .5"
+            "args": "--frameTime 0 -p ReflexAgent -k 1"
         }
     ]
 }
