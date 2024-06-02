@@ -164,11 +164,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        "*** YOUR CODE HERE ***"
-        # iterate over depths
-        #   iterate over agents
-        #     agentIndex = 0 -> pacman, maximize
-        #     agentIndex > 0 -> ghost, minimize
         best_action, best_value = self.multiminimax(gameState, self.depth, 0)
         return best_action
 
@@ -203,9 +198,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     best_value = minimax_objective(best_value, value)
                     if best_value == value:
                         best_action = action
-        print(
-            f"current_depth: {current_depth}, agentIndex: {agent_index}, best_action: {best_action}, best_value: {best_value}"
-        )
+        # print(
+        #     f"current_depth: {current_depth}, agentIndex: {agent_index}, best_action: {best_action}, best_value: {best_value}"
+        # )
         return best_action, best_value
 
 
