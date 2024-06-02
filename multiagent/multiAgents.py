@@ -12,6 +12,8 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+from re import A
+from matplotlib.pylab import f
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -163,7 +165,48 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # iterate over depths
+        #   iterate over agents
+        #     agentIndex = 0 -> pacman, maximize
+        #     agentIndex > 0 -> ghost, minimize
+        best_action, best_value = self.multiminimax(gameState, self.depth, 0)
+        return best_action
+
+    def multiminimax(self, gameState: GameState, current_depth: int, agent_index: int):
+        """
+        Returns a tuple of the best action and the score of the best action. If a terminal state is reached, the action is None.
+        """
+        # is this a terminal state?
+        best_value, best_action = None, None
+        if current_depth == 0 or gameState.isWin() or gameState.isLose():
+            best_action, best_value = None, self.evaluationFunction(gameState)
+        else:
+            legal_moves = gameState.getLegalActions(agent_index)
+            if len(legal_moves) == 0:
+                best_action, best_value = None, self.evaluationFunction(gameState)
+            else:
+                # do recursive work here: non-terminal state with legal moves: setup recursive minimax
+                best_value, minimax_objective = (
+                    float("+inf") if agent_index > 0 else float("-inf"),
+                    min if agent_index > 0 else max,
+                )
+                # process all moves for current agent
+                for action in legal_moves:
+                    successor = gameState.generateSuccessor(agent_index, action)
+                    next_agent_index = (agent_index + 1) % gameState.getNumAgents()
+                    next_depth = (
+                        current_depth if next_agent_index != 0 else current_depth - 1
+                    )
+                    _, value = self.multiminimax(
+                        successor, next_depth, next_agent_index
+                    )
+                    best_value = minimax_objective(best_value, value)
+                    if best_value == value:
+                        best_action = action
+        print(
+            f"current_depth: {current_depth}, agentIndex: {agent_index}, best_action: {best_action}, best_value: {best_value}"
+        )
+        return best_action, best_value
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
