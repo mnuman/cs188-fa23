@@ -164,47 +164,52 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        best_action, best_value = self.multiminimax(gameState, self.depth, 0)
+        return self.maximize(gameState, 1, gameState.getNumAgents() - 1)
+
+    def maximize(self, gameState, depth, numGhosts):
+        """
+        maximizing agent in minimax
+        """
+        if gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        maxVal = float("-inf")
+        best_action = Directions.STOP
+        for action in gameState.getLegalActions(0):
+            successor = gameState.generateSuccessor(0, action)
+            tempVal = self.minimize(successor, depth, 1, numGhosts)
+            if tempVal > maxVal:
+                maxVal = tempVal
+                best_action = action
+
+        # terminal max returns actions whereas intermediate max returns values
+        if depth > 1:
+            return maxVal
         return best_action
 
-    def multiminimax(self, gameState: GameState, current_depth: int, agent_index: int):
+    def minimize(self, gameState, depth, agentIndex, numGhosts):
         """
-        Returns a tuple of the best action and the score of the best action. If a
-        terminal state is reached, the action is None.
+        minimizing agent in minimax
         """
-        # is this a terminal state?
-        best_value, best_action = None, None
-        if current_depth == 0 or gameState.isWin() or gameState.isLose():
-            best_action, best_value = None, self.evaluationFunction(gameState)
-        else:
-            legal_moves = gameState.getLegalActions(agent_index)
-            if len(legal_moves) == 0:
-                best_action, best_value = None, self.evaluationFunction(gameState)
+        if gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        minVal = float("inf")
+        legalActions = gameState.getLegalActions(agentIndex)
+        successors = [
+            gameState.generateSuccessor(agentIndex, action) for action in legalActions
+        ]
+        if agentIndex == numGhosts:
+            if depth < self.depth:
+                for successor in successors:
+                    minVal = min(minVal, self.maximize(successor, depth + 1, numGhosts))
             else:
-                # do recursive work here: non-terminal state with legal moves:
-                # setup recursive minimax
-                best_value, minimax_objective = (
-                    float("+inf") if agent_index > 0 else float("-inf"),
-                    min if agent_index > 0 else max,
+                for successor in successors:
+                    minVal = min(minVal, self.evaluationFunction(successor))
+        else:
+            for successor in successors:
+                minVal = min(
+                    minVal, self.minimize(successor, depth, agentIndex + 1, numGhosts)
                 )
-                # process all moves for current agent
-                for action in legal_moves:
-                    successor = gameState.generateSuccessor(agent_index, action)
-                    next_agent_index = (agent_index + 1) % gameState.getNumAgents()
-                    next_depth = (
-                        current_depth if next_agent_index != 0 else current_depth - 1
-                    )
-                    _, value = self.multiminimax(
-                        successor, next_depth, next_agent_index
-                    )
-                    best_value = minimax_objective(best_value, value)
-                    if best_value == value:
-                        best_action = action
-        # print(
-        #     f"current_depth: {current_depth}, agentIndex: {agent_index},"
-        #      " best_action: {best_action}, best_value: {best_value}"
-        # )
-        return best_action, best_value
+        return minVal
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -212,12 +217,67 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     Your minimax agent with alpha-beta pruning (question 3)
     """
 
-    def getAction(self, gameState: GameState):
+    def maximize(self, gameState, depth, numGhosts, alpha, beta):
+        """
+        maximizing agent with alpha-beta pruning
+        """
+        if gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        maxVal = float("-inf")
+        best_action = Directions.STOP
+        for action in gameState.getLegalActions(0):
+            successor = gameState.generateSuccessor(0, action)
+            tempVal = self.minimize(successor, depth, 1, numGhosts, alpha, beta)
+            if tempVal > maxVal:
+                maxVal = tempVal
+                best_action = action
+
+            # prune
+            if maxVal > beta:
+                return maxVal
+            alpha = max(alpha, maxVal)
+
+        # terminal max returns actions whereas intermediate max returns values
+        if depth > 1:
+            return maxVal
+        return best_action
+
+    def minimize(self, gameState, depth, agentIndex, numGhosts, alpha, beta):
+        """
+        minimizing agent with alpha-beta pruning
+        """
+        if gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+        minVal = float("inf")
+        for action in gameState.getLegalActions(agentIndex):
+            successor = gameState.generateSuccessor(agentIndex, action)
+            if agentIndex == numGhosts:
+                if depth < self.depth:
+                    tempVal = self.maximize(
+                        successor, depth + 1, numGhosts, alpha, beta
+                    )
+                else:
+                    tempVal = self.evaluationFunction(successor)
+            else:
+                tempVal = self.minimize(
+                    successor, depth, agentIndex + 1, numGhosts, alpha, beta
+                )
+            if tempVal < minVal:
+                minVal = tempVal
+
+            # prune
+            if minVal < alpha:
+                return minVal
+            beta = min(beta, minVal)
+        return minVal
+
+    def getAction(self, gameState):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        numGhosts = gameState.getNumAgents() - 1
+        return self.maximize(gameState, 1, numGhosts, float("-inf"), float("inf"))
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
