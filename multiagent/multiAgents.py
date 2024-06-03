@@ -169,7 +169,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def multiminimax(self, gameState: GameState, current_depth: int, agent_index: int):
         """
-        Returns a tuple of the best action and the score of the best action. If a terminal state is reached, the action is None.
+        Returns a tuple of the best action and the score of the best action. If a
+        terminal state is reached, the action is None.
         """
         # is this a terminal state?
         best_value, best_action = None, None
@@ -180,7 +181,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
             if len(legal_moves) == 0:
                 best_action, best_value = None, self.evaluationFunction(gameState)
             else:
-                # do recursive work here: non-terminal state with legal moves: setup recursive minimax
+                # do recursive work here: non-terminal state with legal moves:
+                # setup recursive minimax
                 best_value, minimax_objective = (
                     float("+inf") if agent_index > 0 else float("-inf"),
                     min if agent_index > 0 else max,
@@ -199,7 +201,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     if best_value == value:
                         best_action = action
         # print(
-        #     f"current_depth: {current_depth}, agentIndex: {agent_index}, best_action: {best_action}, best_value: {best_value}"
+        #     f"current_depth: {current_depth}, agentIndex: {agent_index},"
+        #      " best_action: {best_action}, best_value: {best_value}"
         # )
         return best_action, best_value
 
